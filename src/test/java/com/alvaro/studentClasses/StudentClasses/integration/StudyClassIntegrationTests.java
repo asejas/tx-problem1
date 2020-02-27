@@ -14,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -112,7 +111,7 @@ public class StudyClassIntegrationTests {
                 .contentType("application/json")
                 .content(mapper.writeValueAsString(duplicatedStudyClassDto)))
                 .andDo(print())
-                .andExpect(jsonPath("$.message", containsString("Error processing request")))
-                .andExpect(status().isBadRequest());
+                .andExpect(jsonPath("$.message", is("A StudyClass with code: PRG-101 already exists.")))
+                .andExpect(status().isConflict());
     }
 }
