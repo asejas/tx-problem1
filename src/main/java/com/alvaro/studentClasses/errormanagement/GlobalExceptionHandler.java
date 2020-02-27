@@ -1,5 +1,6 @@
 package com.alvaro.studentClasses.errormanagement;
 
+import com.alvaro.studentClasses.errormanagement.exceptions.DuplicateResourceException;
 import com.alvaro.studentClasses.errormanagement.exceptions.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -32,6 +33,13 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(new Date(), ex.getMessage(), request.getDescription(false));
         log.error(ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<?> duplicateResourceException(DuplicateResourceException ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(new Date(), ex.getMessage(), request.getDescription(false));
+        log.error(ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(Exception.class)

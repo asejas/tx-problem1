@@ -4,12 +4,14 @@ import com.alvaro.studentClasses.domain.Student;
 import com.alvaro.studentClasses.domain.StudyClass;
 import com.alvaro.studentClasses.dto.StudentDTO;
 import com.alvaro.studentClasses.dto.StudyClassDTO;
+import com.alvaro.studentClasses.errormanagement.exceptions.DuplicateResourceException;
 import com.alvaro.studentClasses.repository.StudentRepository;
 import com.alvaro.studentClasses.repository.StudyClassRepository;
 import com.alvaro.studentClasses.util.DTOMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +54,7 @@ public class StudyClassService {
     }
 
     public StudyClassDTO save(StudyClassDTO studyClassDto) throws Exception {
+        this.validateForDuplicated(studyClassDto);
         StudyClass studyClass = new StudyClass();
         BeanUtils.copyProperties(studyClassDto, studyClass);
         if (studyClassDto.getStudents() != null && !studyClassDto.getStudents().isEmpty()) {
@@ -76,6 +79,14 @@ public class StudyClassService {
         }
         return students;
     }
-
+    private void validateForDuplicated(StudyClassDTO studyClassDto) throws DuplicateResourceException {
+        if(StringUtils.isEmpty(studyClassDto.getId())) {
+            Optional<StudyClass> optionalStudyClass = studyClassRepository.findByCode(studyClassDto.getCode());
+            if (optionalStudyClass.isPresent()) {
+                throw new DuplicateResourceException(
+                        String.format("A StudyClass with code: %s already exists.", studyClassDto.getCode()));
+            }
+        }
+    }
 
 }

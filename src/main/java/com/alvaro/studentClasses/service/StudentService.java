@@ -4,6 +4,7 @@ import com.alvaro.studentClasses.domain.Student;
 import com.alvaro.studentClasses.domain.StudyClass;
 import com.alvaro.studentClasses.dto.StudentDTO;
 import com.alvaro.studentClasses.dto.StudyClassDTO;
+import com.alvaro.studentClasses.errormanagement.exceptions.DuplicateResourceException;
 import com.alvaro.studentClasses.errormanagement.exceptions.ResourceNotFoundException;
 import com.alvaro.studentClasses.repository.StudentRepository;
 import com.alvaro.studentClasses.repository.StudyClassRepository;
@@ -11,6 +12,7 @@ import com.alvaro.studentClasses.util.DTOMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +54,7 @@ public class StudentService {
     }
 
     public StudentDTO save(StudentDTO studentDto) throws Exception {
+        this.validateForDuplicated(studentDto);
         Student student = new Student();
         BeanUtils.copyProperties(studentDto, student);
         if (studentDto.getStudyClasses() != null && !studentDto.getStudyClasses().isEmpty()) {
@@ -75,5 +78,15 @@ public class StudentService {
             }
         }
         return studyClasses;
+    }
+
+    private void validateForDuplicated(StudentDTO studentDto) throws DuplicateResourceException {
+        if(StringUtils.isEmpty(studentDto.getId())) {
+            Optional<Student> optionalStudent = studentRepository.findByStudentId(studentDto.getStudentId());
+            if (optionalStudent.isPresent()) {
+                throw new DuplicateResourceException(
+                        String.format("A Student with studentId: %s already exists.", studentDto.getStudentId()));
+            }
+        }
     }
 }
