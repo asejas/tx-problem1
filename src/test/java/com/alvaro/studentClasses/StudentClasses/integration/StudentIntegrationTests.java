@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -35,16 +36,16 @@ public class StudentIntegrationTests {
     @Autowired
     private StudyClassRepository studyClassRepository;
 
-    private ObjectMapper mapper=new ObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper();
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         studentRepository.save(TestDataHelper.getStudentPayload());
     }
 
     @AfterEach
-    public void cleanUp(){
-        studentRepository.findAll().stream().forEach(
+    public void cleanUp() {
+        studentRepository.findAll().forEach(
                 student -> studentRepository.deleteById(student.getId())
         );
     }
@@ -54,8 +55,7 @@ public class StudentIntegrationTests {
         mockMvc.perform(get("/student"))
                 .andDo(print())
                 .andExpect(jsonPath("$[0].firstName", is("Pepito")))
-                .andExpect(status()
-                        .isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -63,46 +63,54 @@ public class StudentIntegrationTests {
         mockMvc.perform(get("/student/firstName/Pepito"))
                 .andDo(print())
                 .andExpect(jsonPath("$[0].firstName", is("Pepito")))
-                .andExpect(status()
-                        .isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
     public void test_create_new_student_then_success() throws Exception {
 
         mockMvc.perform(post("/student")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsString(TestDataHelper.getStudentDTOPayload())))
+                .contentType("application/json")
+                .content(mapper.writeValueAsString(TestDataHelper.getStudentDtoPayload())))
                 .andDo(print())
                 .andExpect(jsonPath("$.studentId", is("ID-10")))
-                .andExpect(status()
-                        .isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
     public void test_update_student_then_success() throws Exception {
-        Student student=studentRepository.findByStudentId("ID-1").get();
-        StudentDTO studentDTO=new StudentDTO();
-        studentDTO.setFirstName("NewName");
-        studentDTO.setLastName(student.getLastName());
-        studentDTO.setStudentId(student.getStudentId());
+        Student student = studentRepository.findByStudentId("ID-1").get();
+        StudentDTO studentDto = new StudentDTO();
+        studentDto.setFirstName("NewName");
+        studentDto.setLastName(student.getLastName());
+        studentDto.setStudentId(student.getStudentId());
 
         mockMvc.perform(put(String.format("/student/%s", student.getId()))
                 .contentType("application/json")
-                .content(mapper.writeValueAsString(studentDTO)))
+                .content(mapper.writeValueAsString(studentDto)))
                 .andDo(print())
                 .andExpect(jsonPath("$.firstName", is("NewName")))
-                .andExpect(status()
-                        .isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
     public void test_delete_student_then_success() throws Exception {
-        Student student=studentRepository.findByStudentId("ID-1").get();
+        Student student = studentRepository.findByStudentId("ID-1").get();
 
         mockMvc.perform(delete(String.format("/student/%s", student.getId())))
                 .andDo(print())
-                .andExpect(status()
-                        .isOk());
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void test_create_duplicated_student_then_exception() throws Exception {
+        StudentDTO duplicatedStudentDto = TestDataHelper.getStudentDtoPayload();
+        duplicatedStudentDto.setStudentId("ID-1");
+        mockMvc.perform(post("/student")
+                .contentType("application/json")
+                .content(mapper.writeValueAsString(duplicatedStudentDto)))
+                .andDo(print())
+                .andExpect(jsonPath("$.message", containsString("Error processing request")))
+                .andExpect(status().isBadRequest());
     }
 }

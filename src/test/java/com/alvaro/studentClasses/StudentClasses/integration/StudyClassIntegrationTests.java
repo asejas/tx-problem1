@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -45,7 +46,7 @@ public class StudyClassIntegrationTests {
 
     @AfterEach
     public void cleanUp() {
-        studyClassRepository.findAll().stream().forEach(
+        studyClassRepository.findAll().forEach(
                 studyClass -> studyClassRepository.deleteById(studyClass.getId())
         );
     }
@@ -64,8 +65,7 @@ public class StudyClassIntegrationTests {
         mockMvc.perform(get("/studyClass/code/PRG-101"))
                 .andDo(print())
                 .andExpect(jsonPath("$.title", is("Programming 101")))
-                .andExpect(status()
-                        .isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -73,27 +73,25 @@ public class StudyClassIntegrationTests {
 
         mockMvc.perform(post("/studyClass")
                 .contentType("application/json")
-                .content(mapper.writeValueAsString(TestDataHelper.getStudyClassDTOPayload())))
+                .content(mapper.writeValueAsString(TestDataHelper.getStudyClassDtoPayload())))
                 .andDo(print())
                 .andExpect(jsonPath("$.code", is("ART-200")))
-                .andExpect(status()
-                        .isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
     public void test_update_studyClass_then_success() throws Exception {
         StudyClass studyClass = studyClassRepository.findByCode("PRG-101").get();
-        StudyClassDTO studyClassDTO = new StudyClassDTO();
-        studyClassDTO.setCode(studyClass.getCode());
-        studyClassDTO.setTitle("Programming Fundamentals with Java");
-        studyClassDTO.setDescription(studyClass.getDescription());
+        StudyClassDTO studyClassDto = new StudyClassDTO();
+        studyClassDto.setCode(studyClass.getCode());
+        studyClassDto.setTitle("Programming Fundamentals with Java");
+        studyClassDto.setDescription(studyClass.getDescription());
         mockMvc.perform(put(String.format("/studyClass/%s", studyClass.getId()))
                 .contentType("application/json")
-                .content(mapper.writeValueAsString(studyClassDTO)))
+                .content(mapper.writeValueAsString(studyClassDto)))
                 .andDo(print())
                 .andExpect(jsonPath("$.title", is("Programming Fundamentals with Java")))
-                .andExpect(status()
-                        .isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -102,7 +100,19 @@ public class StudyClassIntegrationTests {
 
         mockMvc.perform(delete(String.format("/studyClass/%s", studyClass.getId())))
                 .andDo(print())
-                .andExpect(status()
-                        .isOk());
+                .andExpect(status().isOk());
+    }
+
+    @Test()
+    public void test_create_duplicated_studyClass_then_exception() throws Exception {
+
+        StudyClassDTO duplicatedStudyClassDto = TestDataHelper.getStudyClassDtoPayload();
+        duplicatedStudyClassDto.setCode("PRG-101");
+        mockMvc.perform(post("/studyClass")
+                .contentType("application/json")
+                .content(mapper.writeValueAsString(duplicatedStudyClassDto)))
+                .andDo(print())
+                .andExpect(jsonPath("$.message", containsString("Error processing request")))
+                .andExpect(status().isBadRequest());
     }
 }

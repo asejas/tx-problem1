@@ -17,12 +17,12 @@ public class TestDataHelper {
         return student;
     }
 
-    public static StudentDTO getStudentDTOPayload(){
-        StudentDTO studentDTO=new StudentDTO();
-        studentDTO.setStudentId("ID-10");
-        studentDTO.setFirstName("Masutatsu");
-        studentDTO.setLastName("Oyama");
-        return studentDTO;
+    public static StudentDTO getStudentDtoPayload(){
+        StudentDTO studentDto=new StudentDTO();
+        studentDto.setStudentId("ID-10");
+        studentDto.setFirstName("Masutatsu");
+        studentDto.setLastName("Oyama");
+        return studentDto;
     }
 
     public static StudyClass getStudyClassPayload() {
@@ -33,11 +33,11 @@ public class TestDataHelper {
         return studyClass;
     }
 
-    public static StudyClassDTO getStudyClassDTOPayload() {
-        StudyClassDTO studyClassDTO = new StudyClassDTO();
-        studyClassDTO.setCode("ART-200");
-        studyClassDTO.setTitle("Art History I");
-        studyClassDTO.setDescription("Art History");
-        return studyClassDTO;
+    public static StudyClassDTO getStudyClassDtoPayload() {
+        StudyClassDTO studyClassDto = new StudyClassDTO();
+        studyClassDto.setCode("ART-200");
+        studyClassDto.setTitle("Art History I");
+        studyClassDto.setDescription("Art History");
+        return studyClassDto;
     }
 }
