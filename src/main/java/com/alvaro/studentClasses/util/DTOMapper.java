@@ -14,65 +14,66 @@ import java.util.stream.Collectors;
  * This class implements methods in order to map domain objects to DTOs and vice-versa
  */
 public class DTOMapper {
-    public StudentDTO fromStudent(Student student) {
-        StudentDTO studentDTO = new StudentDTO();
-        BeanUtils.copyProperties(student, studentDTO, "studyClasses");
+    public StudentDTO mapStudentToStudentDto(Student student) {
+        StudentDTO studentDto = new StudentDTO();
+        BeanUtils.copyProperties(student, studentDto, "studyClasses");
         if (student.getStudyClasses() != null) {
-            studentDTO.setStudyClasses(
+            studentDto.setStudyClasses(
                     student.getStudyClasses().stream().map(
                             studyClass -> {
-                                StudyClassDTO studyClassDTO = new StudyClassDTO();
-                                BeanUtils.copyProperties(studyClass, studyClassDTO, "students");
-                                return studyClassDTO;
+                                StudyClassDTO studyClassDto = new StudyClassDTO();
+                                BeanUtils.copyProperties(studyClass, studyClassDto, "students");
+                                return studyClassDto;
                             }
                     ).collect(Collectors.toSet())
             );
         }
-        return studentDTO;
+        return studentDto;
     }
 
-    public StudyClassDTO fromStudyClass(StudyClass studyClass) {
-        StudyClassDTO studyClassDTO = new StudyClassDTO();
-        BeanUtils.copyProperties(studyClass, studyClassDTO, "students");
+    public StudyClassDTO mapStudyClassToStudyClassDto(StudyClass studyClass) {
+        StudyClassDTO studyClassDto = new StudyClassDTO();
+        BeanUtils.copyProperties(studyClass, studyClassDto, "students");
         if (studyClass.getStudents() != null) {
-            studyClassDTO.setStudents(studyClass.getStudents().stream().map(
+            studyClassDto.setStudents(studyClass.getStudents().stream().map(
                     student -> {
-                        StudentDTO studentDTO = new StudentDTO();
-                        BeanUtils.copyProperties(student, studentDTO, "studyClasses");
-                        return studentDTO;
+                        StudentDTO studentDto = new StudentDTO();
+                        BeanUtils.copyProperties(student, studentDto, "studyClasses");
+                        return studentDto;
                     }
                     ).collect(Collectors.toSet())
             );
         }
-        return studyClassDTO;
+        return studyClassDto;
     }
 
-    public List<StudyClassDTO> mapToStudyClassDTOList(List<StudyClass> studyClasses) {
+    public List<StudyClassDTO> mapStudyClassListToStudyClassDtoList(List<StudyClass> studyClasses) {
         return studyClasses.stream()
-                .map(this::fromStudyClass)
+                .map(this::mapStudyClassToStudyClassDto)
                 .collect(Collectors.toList());
     }
 
-    public Optional<StudyClassDTO> mapToOptionalStudyClassDTO(Optional<StudyClass> optionalStudyClass){
-        Optional<StudyClassDTO> optionalStudyClassDTO = Optional.empty();
+    public Optional<StudyClassDTO> mapOptionalStudyClassToOptionalStudyClassDto(
+            Optional<StudyClass> optionalStudyClass){
+        Optional<StudyClassDTO> optionalStudyClassDto = Optional.empty();
         if (optionalStudyClass.isPresent()) {
-            optionalStudyClassDTO = Optional.of(this.fromStudyClass(optionalStudyClass.get()));
+            optionalStudyClassDto = Optional.of(this.mapStudyClassToStudyClassDto(optionalStudyClass.get()));
         }
-        return optionalStudyClassDTO;
+        return optionalStudyClassDto;
     }
 
-    public List<StudentDTO> mapToStudentDTOList(List<Student> students) {
+    public List<StudentDTO> mapStudentListToStudentDtoList(List<Student> students) {
         return students.stream()
-                .map(this::fromStudent)
+                .map(this::mapStudentToStudentDto)
                 .collect(Collectors.toList());
     }
 
-    public Optional<StudentDTO> mapToOptionalStudentDTO(Optional<Student> optionalStudent){
-        Optional<StudentDTO> optionalStudentDTO = Optional.empty();
+    public Optional<StudentDTO> mapOptionalStudentToOptionalStudentDto(Optional<Student> optionalStudent){
+        Optional<StudentDTO> optionalStudentDto = Optional.empty();
         if (optionalStudent.isPresent()) {
-            optionalStudentDTO = Optional.of(this.fromStudent(optionalStudent.get()));
+            optionalStudentDto = Optional.of(this.mapStudentToStudentDto(optionalStudent.get()));
         }
-        return optionalStudentDTO;
+        return optionalStudentDto;
     }
 
 }

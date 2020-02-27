@@ -19,5 +19,5 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     Optional<Student> findByStudentId(String studentId);
 
     @Query("select st from Student st join st.studyClasses stc where stc.code = :code")
-    public List<Student> findByStudyClassCode(@Param("code") String code);
+    List<Student> findByStudyClassCode(@Param("code") String code);
 }

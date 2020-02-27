@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -27,20 +26,20 @@ public class StudyClassController {
      */
     @GetMapping()
     @ApiOperation(value = "Get all study classes")
-    public ResponseEntity<List<StudyClassDTO>> findAll() {
-        return ResponseEntity.ok(studyClassService.findAll());
+    public List<StudyClassDTO> findAll() {
+        return studyClassService.findAll();
     }
 
     /**
      * Create new StudyClass
-     * @param studyClassDTO The StudyClass data
+     * @param studyClassDto The StudyClass data
      * @return The new StudyClass
      * @throws Exception If an error occurs
      */
     @PostMapping
     @ApiOperation(value = "Create new StudyClasses")
-    public ResponseEntity create(@Valid @RequestBody StudyClassDTO studyClassDTO) throws Exception {
-        return ResponseEntity.ok(studyClassService.save(studyClassDTO));
+    public StudyClassDTO create(@Valid @RequestBody StudyClassDTO studyClassDto) throws Exception {
+        return studyClassService.save(studyClassDto);
     }
 
     /**
@@ -51,15 +50,14 @@ public class StudyClassController {
      */
     @GetMapping("/{id}")
     @ApiOperation(value = "Search a StudyClass by id")
-    public ResponseEntity<StudyClassDTO> findById(
+    public StudyClassDTO findById(
             @ApiParam(value = "The StudyClass id") @PathVariable Long id) throws ResourceNotFoundException {
-        Optional<StudyClassDTO> studyClassDTO = studyClassService.findById(id);
-        if (!studyClassDTO.isPresent()) {
-            log.warn(String.format("StudyClass %s don't exists", id));
+        Optional<StudyClassDTO> studyClassDto = studyClassService.findById(id);
+        if (!studyClassDto.isPresent()) {
             throw new ResourceNotFoundException(String.format("StudyClass %s don't exists", id));
         }
 
-        return ResponseEntity.ok(studyClassDTO.get());
+        return studyClassDto.get();
     }
 
     /**
@@ -69,9 +67,9 @@ public class StudyClassController {
      */
     @GetMapping("/title/{title}")
     @ApiOperation(value = "Search StudyClasses by title")
-    public ResponseEntity<List<StudyClassDTO>> findByTitle(
+    public List<StudyClassDTO> findByTitle(
             @ApiParam(value = "The StudyClass title") @PathVariable String title) {
-        return ResponseEntity.ok(studyClassService.findByTitle(title));
+        return studyClassService.findByTitle(title);
     }
 
     /**
@@ -81,10 +79,10 @@ public class StudyClassController {
      */
     @GetMapping("/description/{description}")
     @ApiOperation(value = "Search StudyClasses by description")
-    public ResponseEntity<List<StudyClassDTO>> findByDescription(
+    public List<StudyClassDTO> findByDescription(
             @ApiParam(value = "The StudyClass description") @PathVariable String description) {
 
-        return ResponseEntity.ok(studyClassService.findByDescription(description));
+        return studyClassService.findByDescription(description);
     }
 
     /**
@@ -94,9 +92,9 @@ public class StudyClassController {
      */
     @GetMapping("/students/{studentId}")
     @ApiOperation(value = "Search StudyClasses by its students")
-    public ResponseEntity<List<StudyClassDTO>> findByStudentStudentId(
+    public List<StudyClassDTO> findByStudentStudentId(
             @ApiParam(value = "The student studentId") @PathVariable String studentId) {
-        return ResponseEntity.ok(studyClassService.findByStudentStudentId(studentId));
+        return studyClassService.findByStudentStudentId(studentId);
     }
 
     /**
@@ -106,42 +104,42 @@ public class StudyClassController {
      */
     @GetMapping("/code/{code}")
     @ApiOperation(value = "Search StudyClasses by code")
-    public ResponseEntity<StudyClassDTO> findByCode(
-            @ApiParam(value = "The StudyClass code") @PathVariable String code) {
-        Optional<StudyClassDTO> studyClassDTO = studyClassService.findByCode(code);
-        if (!studyClassDTO.isPresent()) {
-            log.warn(String.format("StudyClass with code %s don't exists", code));
-            ResponseEntity.badRequest().build();
+    public StudyClassDTO findByCode(
+            @ApiParam(value = "The StudyClass code") @PathVariable String code) throws ResourceNotFoundException {
+        Optional<StudyClassDTO> optionalStudyClassDto = studyClassService.findByCode(code);
+        if (!optionalStudyClassDto.isPresent()) {
+            throw new ResourceNotFoundException(String.format("StudyClass with code %s don't exists", code));
         }
 
-        return ResponseEntity.ok(studyClassDTO.get());
+        return optionalStudyClassDto.get();
     }
 
     /**
      * Update a StudyClass
      * @param id The id of the StudyClass to update
-     * @param studyClassDTO The StudyClass data to update
+     * @param studyClassDto The StudyClass data to update
      * @return The updated StudyClass
      * @throws Exception If an error occurs
      */
     @PutMapping("/{id}")
     @ApiOperation(value = "Update a StudyClass")
-    public ResponseEntity<StudyClassDTO> update(
+    public StudyClassDTO update(
             @ApiParam(value = "The id of the StudyClass to update ") @PathVariable Long id,
-            @Valid @RequestBody StudyClassDTO studyClassDTO) throws Exception {
-        studyClassDTO.setId(id);
-        return ResponseEntity.ok(studyClassService.save(studyClassDTO));
+            @Valid @RequestBody StudyClassDTO studyClassDto) throws Exception {
+        if(!this.studyClassService.findById(id).isPresent()){
+            throw new ResourceNotFoundException(String.format("StudyClass %s don't exists", id));
+        }
+        studyClassDto.setId(id);
+        return studyClassService.save(studyClassDto);
     }
 
     /**
      * Delete a StudyClass
      * @param id The StudyClass id
-     * @return The operation status
      */
     @DeleteMapping("/{id}")
     @ApiOperation(value = "Delete a StudyClass")
-    public ResponseEntity delete(@ApiParam(value = "The StudyClass id") @PathVariable Long id) {
+    public void delete(@ApiParam(value = "The StudyClass id") @PathVariable Long id) {
         studyClassService.deleteById(id);
-        return ResponseEntity.ok().build();
     }
 }

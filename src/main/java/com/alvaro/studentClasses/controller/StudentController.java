@@ -1,12 +1,12 @@
 package com.alvaro.studentClasses.controller;
 
 import com.alvaro.studentClasses.dto.StudentDTO;
+import com.alvaro.studentClasses.errormanagement.exceptions.ResourceNotFoundException;
 import com.alvaro.studentClasses.service.StudentService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,21 +30,21 @@ public class StudentController {
      */
     @GetMapping()
     @ApiOperation(value = "Return a list of all students")
-    public ResponseEntity<List<StudentDTO>> findAll() {
-        return ResponseEntity.ok(studentService.findAll());
+    public List<StudentDTO> findAll() {
+        return studentService.findAll();
     }
 
     /**
      * Create a new student
      *
-     * @param student student data
+     * @param studentDto student data
      * @return The new student created
      * @throws Exception If an error occurs
      */
     @PostMapping
     @ApiOperation(value = "Create a new student")
-    public ResponseEntity create(@Valid @RequestBody StudentDTO student) throws Exception {
-        return ResponseEntity.ok(studentService.save(student));
+    public StudentDTO create(@Valid @RequestBody StudentDTO studentDto) throws Exception {
+        return studentService.save(studentDto);
     }
 
     /**
@@ -55,14 +55,14 @@ public class StudentController {
      */
     @GetMapping("/{id}")
     @ApiOperation(value = "Search a student by id")
-    public ResponseEntity<StudentDTO> findById(@ApiParam(value = "Student entity id") @PathVariable Long id) {
+    public StudentDTO findById(@ApiParam(value = "Student entity id") @PathVariable Long id)
+            throws ResourceNotFoundException {
         Optional<StudentDTO> student = studentService.findById(id);
         if (!student.isPresent()) {
-            log.warn(String.format("Student %s don't exists", id));
-            ResponseEntity.badRequest().build();
+            throw new ResourceNotFoundException(String.format("Student %s don't exists", id));
         }
 
-        return ResponseEntity.ok(student.get());
+        return student.get();
     }
 
     /**
@@ -73,15 +73,14 @@ public class StudentController {
      */
     @GetMapping("/studentId/{studentId}")
     @ApiOperation(value = "Search a student by student ID")
-    public ResponseEntity<StudentDTO> findByStudentId(
-            @ApiParam(value = "The studentId") @PathVariable String studentId) {
+    public StudentDTO findByStudentId(
+            @ApiParam(value = "The studentId") @PathVariable String studentId) throws ResourceNotFoundException {
         Optional<StudentDTO> student = studentService.findByStudentId(studentId);
         if (!student.isPresent()) {
-            log.warn(String.format("Student with studentId %s don't exists", studentId));
-            ResponseEntity.badRequest().build();
+            throw new ResourceNotFoundException(String.format("Student with studentId %s don't exists", studentId));
         }
 
-        return ResponseEntity.ok(student.get());
+        return student.get();
     }
 
     /**
@@ -92,9 +91,9 @@ public class StudentController {
      */
     @GetMapping("/firstName/{firstName}")
     @ApiOperation(value = "Search students by first name")
-    public ResponseEntity<List<StudentDTO>> findByFirstName(
+    public List<StudentDTO> findByFirstName(
             @ApiParam( value = "The student first name") @PathVariable String firstName) {
-        return ResponseEntity.ok(studentService.findByFirstName(firstName));
+        return studentService.findByFirstName(firstName);
     }
 
     /**
@@ -105,9 +104,9 @@ public class StudentController {
      */
     @GetMapping("/lastName/{lastName}")
     @ApiOperation(value = "Search students by last name")
-    public ResponseEntity<List<StudentDTO>> findByLastName(
+    public List<StudentDTO> findByLastName(
             @ApiParam(value = "Student last name")@PathVariable String lastName) {
-        return ResponseEntity.ok(studentService.findByLastName(lastName));
+        return studentService.findByLastName(lastName);
     }
 
     /**
@@ -118,46 +117,41 @@ public class StudentController {
      */
     @GetMapping("/studyClasses/{code}")
     @ApiOperation(value = "Search students that are in a specific study class (by the study class code)")
-    public ResponseEntity<List<StudentDTO>> findByStudyClassesCode(
+    public List<StudentDTO> findByStudyClassesCode(
             @ApiParam(value = "The study class code") @PathVariable String code) {
-        return ResponseEntity.ok(studentService.findByStudyClassCode(code));
+        return studentService.findByStudyClassCode(code);
     }
 
     /**
      * Update the student data
      *
      * @param id      The student entity id
-     * @param student The student data to store
+     * @param studentDto The student data to store
      * @return The updated student
      * @throws Exception If an error occurs
      */
     @PutMapping("/{id}")
     @ApiOperation(value = "Update the student data")
-    public ResponseEntity<StudentDTO> update(@ApiParam(value = "The student entity id") @PathVariable Long id,
-                                             @Valid @RequestBody StudentDTO student) throws Exception {
+    public StudentDTO update(@ApiParam(value = "The student entity id") @PathVariable Long id,
+                                             @Valid @RequestBody StudentDTO studentDto) throws Exception {
         if (!studentService.findById(id).isPresent()) {
-            log.error(String.format("Student %s don't exists", id));
-            ResponseEntity.badRequest().build();
+            throw new ResourceNotFoundException(String.format("Student %s don't exists", id));
         }
-        student.setId(id);
-        return ResponseEntity.ok(studentService.save(student));
+        studentDto.setId(id);
+        return studentService.save(studentDto);
     }
 
     /**
      * Delete a student
      * @param id The student entity id
-     * @return The operation status
      */
     @DeleteMapping("/{id}")
     @ApiOperation(value = "Delete a student by id")
 
-    public ResponseEntity delete(@ApiParam(value = "The student id") @PathVariable Long id) {
+    public void delete(@ApiParam(value = "The student id") @PathVariable Long id) {
         if (!studentService.findById(id).isPresent()) {
             log.warn(String.format("Student %s don't exists", id));
-            ResponseEntity.badRequest().build();
         }
-
         studentService.deleteById(id);
-        return ResponseEntity.ok().build();
     }
 }

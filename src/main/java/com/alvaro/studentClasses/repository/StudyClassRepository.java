@@ -1,6 +1,5 @@
 package com.alvaro.studentClasses.repository;
 
-import com.alvaro.studentClasses.domain.Student;
 import com.alvaro.studentClasses.domain.StudyClass;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,5 +19,5 @@ public interface StudyClassRepository extends JpaRepository<StudyClass, Long> {
     List<StudyClass> findByDescription(String description);
 
     @Query("select sc from StudyClass sc join sc.students st where st.studentId = :studentId")
-    public List<StudyClass> findByStudentStudentId(@Param("studentId") String studentId);
+    List<StudyClass> findByStudentStudentId(@Param("studentId") String studentId);
 }

@@ -28,50 +28,50 @@ public class StudentService {
     private DTOMapper dtoMapper = new DTOMapper();
 
     public List<StudentDTO> findAll() {
-        return dtoMapper.mapToStudentDTOList(studentRepository.findAll());
+        return dtoMapper.mapStudentListToStudentDtoList(studentRepository.findAll());
     }
 
     public Optional<StudentDTO> findById(Long id) {
-        return dtoMapper.mapToOptionalStudentDTO(studentRepository.findById(id));
+        return dtoMapper.mapOptionalStudentToOptionalStudentDto(studentRepository.findById(id));
     }
 
     public List<StudentDTO> findByLastName(String lastName) {
-        return dtoMapper.mapToStudentDTOList(studentRepository.findByLastName(lastName));
+        return dtoMapper.mapStudentListToStudentDtoList(studentRepository.findByLastName(lastName));
     }
 
     public List<StudentDTO> findByFirstName(String firstName) {
-        return dtoMapper.mapToStudentDTOList(studentRepository.findByFirstName(firstName));
+        return dtoMapper.mapStudentListToStudentDtoList(studentRepository.findByFirstName(firstName));
     }
 
     public Optional<StudentDTO> findByStudentId(String studentId) {
-        return dtoMapper.mapToOptionalStudentDTO(studentRepository.findByStudentId(studentId));
+        return dtoMapper.mapOptionalStudentToOptionalStudentDto(studentRepository.findByStudentId(studentId));
     }
 
     public List<StudentDTO> findByStudyClassCode(String code) {
-        return dtoMapper.mapToStudentDTOList(studentRepository.findByStudyClassCode(code));
+        return dtoMapper.mapStudentListToStudentDtoList(studentRepository.findByStudyClassCode(code));
     }
 
-    public StudentDTO save(StudentDTO studentDTO) throws Exception {
+    public StudentDTO save(StudentDTO studentDto) throws Exception {
         Student student = new Student();
-        BeanUtils.copyProperties(studentDTO, student);
-        if (studentDTO.getStudyClasses() != null && !studentDTO.getStudyClasses().isEmpty()) {
-            student.setStudyClasses(this.getStudyClassInstanceList(studentDTO));
+        BeanUtils.copyProperties(studentDto, student);
+        if (studentDto.getStudyClasses() != null && !studentDto.getStudyClasses().isEmpty()) {
+            student.setStudyClasses(this.getStudyClassInstanceList(studentDto));
         }
-        return dtoMapper.fromStudent(studentRepository.save(student));
+        return dtoMapper.mapStudentToStudentDto(studentRepository.save(student));
     }
 
     public void deleteById(Long id) {
         studentRepository.deleteById(id);
     }
 
-    private Set<StudyClass> getStudyClassInstanceList(StudentDTO studentDTO) throws Exception {
+    private Set<StudyClass> getStudyClassInstanceList(StudentDTO studentDto) throws Exception {
         Set<StudyClass> studyClasses = new HashSet<>();
-        for (StudyClassDTO studyClassDTO : studentDTO.getStudyClasses()) {
-            Optional<StudyClass> loadedStudyClass = studyClassRepository.findById(studyClassDTO.getId());
+        for (StudyClassDTO studyClassDto : studentDto.getStudyClasses()) {
+            Optional<StudyClass> loadedStudyClass = studyClassRepository.findById(studyClassDto.getId());
             if (loadedStudyClass.isPresent()) {
                 studyClasses.add(loadedStudyClass.get());
             } else {
-                throw new ResourceNotFoundException(String.format("The studyClass %s don't exists", studyClassDTO.getId()));
+                throw new ResourceNotFoundException(String.format("The studyClass %s don't exists", studyClassDto.getId()));
             }
         }
         return studyClasses;
