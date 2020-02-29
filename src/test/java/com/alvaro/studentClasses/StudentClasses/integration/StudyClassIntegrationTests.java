@@ -52,29 +52,37 @@ public class StudyClassIntegrationTests {
 
     @Test
     public void test_get_all_studyClasses_then_success() throws Exception {
+        StudyClass studyClass = TestDataHelper.getStudyClassPayload();
         mockMvc.perform(get("/studyClass"))
                 .andDo(print())
-                .andExpect(jsonPath("$[0].code", is("PRG-101")))
+                .andExpect(jsonPath("$[0].code", is(studyClass.getCode())))
+                .andExpect(jsonPath("$[0].title", is(studyClass.getTitle())))
+                .andExpect(jsonPath("$[0].description", is(studyClass.getDescription())))
                 .andExpect(status()
                         .isOk());
     }
 
     @Test
     public void test_find_studyClasses_by_code_then_success() throws Exception {
-        mockMvc.perform(get("/studyClass/code/PRG-101"))
+        StudyClass studyClass = TestDataHelper.getStudyClassPayload();
+        mockMvc.perform(get(String.format("/studyClass/code/%s",studyClass.getCode())))
                 .andDo(print())
-                .andExpect(jsonPath("$.title", is("Programming 101")))
+                .andExpect(jsonPath("$.code", is(studyClass.getCode())))
+                .andExpect(jsonPath("$.title", is(studyClass.getTitle())))
+                .andExpect(jsonPath("$.description", is(studyClass.getDescription())))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void test_create_new_studyClass_then_success() throws Exception {
-
+        StudyClassDTO studyClassDto = TestDataHelper.getStudyClassDtoPayload();
         mockMvc.perform(post("/studyClass")
                 .contentType("application/json")
-                .content(mapper.writeValueAsString(TestDataHelper.getStudyClassDtoPayload())))
+                .content(mapper.writeValueAsString(studyClassDto)))
                 .andDo(print())
-                .andExpect(jsonPath("$.code", is("ART-200")))
+                .andExpect(jsonPath("$.code", is(studyClassDto.getCode())))
+                .andExpect(jsonPath("$.title", is(studyClassDto.getTitle())))
+                .andExpect(jsonPath("$.description", is(studyClassDto.getDescription())))
                 .andExpect(status().isOk());
     }
 
@@ -89,6 +97,8 @@ public class StudyClassIntegrationTests {
                 .contentType("application/json")
                 .content(mapper.writeValueAsString(studyClassDto)))
                 .andDo(print())
+                .andExpect(jsonPath("$.code", is(studyClassDto.getCode())))
+                .andExpect(jsonPath("$.description", is(studyClassDto.getDescription())))
                 .andExpect(jsonPath("$.title", is("Programming Fundamentals with Java")))
                 .andExpect(status().isOk());
     }

@@ -51,28 +51,36 @@ public class StudentIntegrationTests {
 
     @Test
     public void test_get_all_students_then_success() throws Exception {
+        Student student = TestDataHelper.getStudentPayload();
         mockMvc.perform(get("/student"))
                 .andDo(print())
-                .andExpect(jsonPath("$[0].firstName", is("Pepito")))
+                .andExpect(jsonPath("$[0].firstName", is(student.getFirstName())))
+                .andExpect(jsonPath("$[0].lastName", is(student.getLastName())))
+                .andExpect(jsonPath("$[0].studentId", is(student.getStudentId())))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void test_find_student_by_first_name_then_success() throws Exception {
-        mockMvc.perform(get("/student/firstName/Pepito"))
+        Student student = TestDataHelper.getStudentPayload();
+        mockMvc.perform(get(String.format("/student/firstName/%s", student.getFirstName())))
                 .andDo(print())
-                .andExpect(jsonPath("$[0].firstName", is("Pepito")))
+                .andExpect(jsonPath("$[0].firstName", is(student.getFirstName())))
+                .andExpect(jsonPath("$[0].lastName", is(student.getLastName())))
+                .andExpect(jsonPath("$[0].studentId", is(student.getStudentId())))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void test_create_new_student_then_success() throws Exception {
-
+        StudentDTO studentDto = TestDataHelper.getStudentDtoPayload();
         mockMvc.perform(post("/student")
                 .contentType("application/json")
-                .content(mapper.writeValueAsString(TestDataHelper.getStudentDtoPayload())))
+                .content(mapper.writeValueAsString(studentDto)))
                 .andDo(print())
-                .andExpect(jsonPath("$.studentId", is("ID-10")))
+                .andExpect(jsonPath("$.firstName", is(studentDto.getFirstName())))
+                .andExpect(jsonPath("$.lastName", is(studentDto.getLastName())))
+                .andExpect(jsonPath("$.studentId", is(studentDto.getStudentId())))
                 .andExpect(status().isOk());
     }
 
@@ -88,6 +96,8 @@ public class StudentIntegrationTests {
                 .contentType("application/json")
                 .content(mapper.writeValueAsString(studentDto)))
                 .andDo(print())
+                .andExpect(jsonPath("$.lastName", is(studentDto.getLastName())))
+                .andExpect(jsonPath("$.studentId", is(studentDto.getStudentId())))
                 .andExpect(jsonPath("$.firstName", is("NewName")))
                 .andExpect(status().isOk());
     }
